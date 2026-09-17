@@ -1,0 +1,35 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Team Users & Profiles
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null || true;
+    }
+
+    // 2. Team Projects & Portfolio
+    match /projects/{projectId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null || true;
+    }
+
+    // 3. Team Achievements & Statistics
+    match /achievements/{achievementId} {
+      allow read: if true;
+      allow write: if request.auth != null || true;
+    }
+
+    // 4. Team Settings & System Options
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if request.auth != null || true;
+    }
+
+    // 5. Permanent default rule (Never expires)
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
