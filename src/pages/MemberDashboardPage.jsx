@@ -19,10 +19,12 @@ import {
   Upload,
   Eye,
   Save,
+  Crop,
 } from "lucide-react";
 import { Badge } from "../components/common/Badge";
 import { Button } from "../components/common/Button";
 import { Modal } from "../components/common/Modal";
+import { ImageCropModal } from "../components/common/ImageCropModal";
 import toast from "react-hot-toast";
 
 export const MemberDashboardPage = () => {
@@ -119,6 +121,9 @@ export const MemberDashboardPage = () => {
     startDate: "",
     endDate: "",
   });
+
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [selectedRawImage, setSelectedRawImage] = useState("");
 
   if (!currentUser) {
     return <Navigate to="/login" replace />;
@@ -392,30 +397,51 @@ export const MemberDashboardPage = () => {
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 space-y-1.5">
+                  <div className="flex-1 space-y-2">
                     <label className="block text-xs font-bold text-gray-900 dark:text-white">
-                      Profile Photo (Upload from device to store as Base64 in Firestore)
+                      Profile Photo (Crop, Position & Zoom Enabled)
                     </label>
                     <p className="text-[11px] text-gray-500">
-                      Select an image file from your computer/mobile. It will automatically convert to Base64 format.
+                      Upload any photo from your computer/mobile. You can drag to reposition, zoom in/out, and rotate before saving.
                     </p>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          try {
-                            const base64 = await convertFileToBase64(file, 400, 400, 0.8);
-                            setProfileForm((prev) => ({ ...prev, avatar: base64 }));
-                            toast.success("Photo selected! Click 'Save Changes' to update in Firestore.");
-                          } catch (err) {
-                            toast.error("Failed to process image file.");
-                          }
-                        }
-                      }}
-                      className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer"
-                    />
+                    <div className="flex flex-wrap items-center gap-2">
+                      <label className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition">
+                        <Upload className="w-3.5 h-3.5" />
+                        Choose & Crop Photo
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                setSelectedRawImage(event.target.result);
+                                setCropperOpen(true);
+                              };
+                              reader.readAsDataURL(file);
+                              e.target.value = "";
+                            }
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {profileForm.avatar && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedRawImage(profileForm.avatar);
+                            setCropperOpen(true);
+                          }}
+                          icon={Crop}
+                        >
+                          Re-adjust Current Photo
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -1394,6 +1420,17 @@ export const MemberDashboardPage = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Profile Image Cropper & Adjustment Modal */}
+      <ImageCropModal
+        isOpen={cropperOpen}
+        onClose={() => setCropperOpen(false)}
+        imageSrc={selectedRawImage}
+        onCropComplete={(croppedBase64) => {
+          setProfileForm((prev) => ({ ...prev, avatar: croppedBase64 }));
+          toast.success("Photo cropped & adjusted! Click 'Save Changes' to update in Firestore.");
+        }}
+      />
     </div>
   );
 };
