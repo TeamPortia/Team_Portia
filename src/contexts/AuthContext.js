@@ -176,97 +176,15 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password, isAdminLogin = false) => {
     const cleanEmail = email.trim().toLowerCase();
-    const ADMIN_EMAIL = "mscteam6@gmail.com";
-    const ADMIN_PASSWORD = "Mscteam006#";
 
-    if (isAdminLogin) {
-      if (cleanEmail !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
-        throw new Error("Invalid Admin credentials! Only authorized Admin (mscteam6@gmail.com) can access the Admin Panel.");
-      }
-    }
-
-    // Official Admin Account Login
-    if (cleanEmail === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      let fbUser = null;
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
-        fbUser = userCredential.user;
-      } catch (authError) {
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, cleanEmail, password);
-          fbUser = userCredential.user;
-        } catch (createErr) {
-          console.warn("Admin Auth creation notice:", createErr);
-        }
-      }
-
-      const adminUid = fbUser?.uid || "admin-msc-team";
-
-      const adminDoc = {
-        id: adminUid,
-        uid: adminUid,
-        email: cleanEmail,
-        fullName: "System Administrator",
-        role: "ADMIN",
-        isAdmin: true,
-        title: "Team Administrator",
-        avatar: "",
-        bio: "Official System Administrator for MSC Team Portfolio.",
-        status: "active",
-        isOnline: true,
-        lastSeen: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      try {
-        await setDoc(doc(db, "users", adminUid), adminDoc, { merge: true });
-      } catch (fsErr) {
-        console.warn("Firestore admin doc update notice:", fsErr);
-      }
-
-      const loggedInUser = {
-        uid: adminUid,
-        email: cleanEmail,
-        displayName: "System Administrator",
-        fullName: "System Administrator",
-        photoURL: "",
-        avatar: "",
-        isAdmin: true,
-        role: "ADMIN",
-      };
-
-      setCurrentUser(loggedInUser);
-      localStorage.setItem("team_member_session", JSON.stringify(loggedInUser));
-      return loggedInUser;
-    }
-
-    // 1. Try standard Firebase Auth sign in
+    // 1. Authenticate directly via Firebase Authentication
+    let userCredential = null;
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
-      const user = userCredential.user;
-
-      let userRole = "MEMBER";
-      try {
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          userRole = data.role || (data.isAdmin ? "ADMIN" : "MEMBER");
-        }
-      } catch {}
-
-      const isAdmin = userRole === "ADMIN" || cleanEmail === ADMIN_EMAIL;
-
-      if (isAdminLogin && !isAdmin) {
-        await fbSignOut(auth);
-        throw new Error("This account does not have Admin privileges in Firestore.");
-      }
-
-      await setOnlineStatus(user.uid, true);
-      return user;
+      userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
     } catch (authError) {
-      console.warn("Primary auth login notice:", authError);
+      console.warn("Primary Firebase Auth sign in notice:", authError);
 
-      // 2. Fallback: If Firebase Auth fails (or is rate limited / credential mismatch), check Firestore for member doc!
+      // Fallback: Check Firestore "users" collection if offline or rate limited
       try {
         const usersRef = collection(db, "users");
         const q = query(usersRef, where("email", "==", cleanEmail));
@@ -277,10 +195,10 @@ export const AuthProvider = ({ children }) => {
           const memberData = memberDoc.data();
           const memberUid = memberDoc.id;
 
-          const isAdmin = memberData.role === "ADMIN" || memberData.isAdmin === true || cleanEmail === ADMIN_EMAIL;
+          const isAdmin = memberData.role === "ADMIN" || memberData.isAdmin === true;
 
           if (isAdminLogin && !isAdmin) {
-            throw new Error("This account does not have Admin privileges in Firestore.");
+            throw new Error("Access Denied: This account does not have Administrator privileges in Firebase Database.");
           }
 
           const fallbackUser = {
@@ -300,11 +218,59 @@ export const AuthProvider = ({ children }) => {
           return fallbackUser;
         }
       } catch (fallbackErr) {
-        console.warn("Firestore fallback error:", fallbackErr);
+        console.warn("Firestore fallback check failed:", fallbackErr);
       }
 
       throw authError;
     }
+
+    const user = userCredential.user;
+
+    // 2. Fetch User Profile & Role from Firestore "users" collection
+    let userRole = "MEMBER";
+    let userData = null;
+
+    try {
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        userData = userDoc.data();
+        userRole = userData.role || (userData.isAdmin ? "ADMIN" : "MEMBER");
+      } else {
+        const q = query(collection(db, "users"), where("email", "==", cleanEmail));
+        const querySnap = await getDocs(q);
+        if (!querySnap.empty) {
+          userData = querySnap.docs[0].data();
+          userRole = userData.role || (userData.isAdmin ? "ADMIN" : "MEMBER");
+        }
+      }
+    } catch (docErr) {
+      console.warn("Firestore user profile fetch notice:", docErr);
+    }
+
+    const isAdmin = userRole === "ADMIN" || userData?.isAdmin === true;
+
+    // 3. If Admin Gateway login was requested, strictly check for ADMIN role in Firestore
+    if (isAdminLogin && !isAdmin) {
+      await fbSignOut(auth);
+      throw new Error("Access Denied: This account does not have Administrator privileges in Firebase Database.");
+    }
+
+    await setOnlineStatus(user.uid, true);
+
+    const loggedInUser = {
+      uid: user.uid,
+      email: user.email,
+      displayName: userData?.fullName || user.displayName || cleanEmail.split("@")[0],
+      fullName: userData?.fullName || cleanEmail.split("@")[0],
+      photoURL: userData?.avatar || user.photoURL || "",
+      avatar: userData?.avatar || user.photoURL || "",
+      isAdmin,
+      role: isAdmin ? "ADMIN" : "MEMBER",
+    };
+
+    setCurrentUser(loggedInUser);
+    localStorage.setItem("team_member_session", JSON.stringify(loggedInUser));
+    return loggedInUser;
   };
 
   // Register a new Member account directly in Auth & Firestore
