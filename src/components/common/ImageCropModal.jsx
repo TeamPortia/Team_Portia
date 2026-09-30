@@ -124,11 +124,18 @@ export const ImageCropModal = ({ isOpen, onClose, imageSrc, onCropComplete }) =>
     onClose();
   };
 
+  const handleUseOriginal = () => {
+    if (imageSrc) {
+      onCropComplete(imageSrc);
+      onClose();
+    }
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Crop & Adjust Profile Picture" size="md">
       <div className="space-y-6">
         <p className="text-xs text-gray-500 text-center">
-          Drag photo to position, use slider to zoom, or click buttons to rotate.
+          Drag photo to position, use slider to zoom, or click <strong>Use Full Original Photo</strong> to keep the original uncropped photo.
         </p>
 
         {/* Interactive Crop Viewport Canvas */}
@@ -218,13 +225,24 @@ export const ImageCropModal = ({ isOpen, onClose, imageSrc, onCropComplete }) =>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full sm:w-auto"
+            onClick={handleUseOriginal}
+          >
+            Use Full Original Photo (No Crop)
           </Button>
-          <Button type="button" variant="gradient" onClick={handleCropAndSave} icon={Check}>
-            Apply & Save Photo
-          </Button>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="button" variant="gradient" onClick={handleCropAndSave} icon={Check}>
+              Apply & Save Crop
+            </Button>
+          </div>
         </div>
       </div>
     </Modal>
