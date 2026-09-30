@@ -1205,6 +1205,8 @@ export const MemberDashboardPage = () => {
               <option value="Programming">Programming</option>
               <option value="Web Development">Web Development</option>
               <option value="Mobile Development">Mobile Development</option>
+              <option value="Frameworks">Frameworks</option>
+              <option value="Operating Systems">Operating Systems</option>
               <option value="Database">Database</option>
               <option value="Cloud">Cloud</option>
               <option value="DevOps">DevOps</option>
