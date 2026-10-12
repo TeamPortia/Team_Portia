@@ -1,5 +1,5 @@
 // src/pages/MemberDashboardPage.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useData } from "../contexts/DataContext";
@@ -24,12 +24,14 @@ import {
 import { Badge } from "../components/common/Badge";
 import { Button } from "../components/common/Button";
 import { Modal } from "../components/common/Modal";
+import { LoadingSpinner } from "../components/common/LoadingSpinner";
 import { ImageCropModal } from "../components/common/ImageCropModal";
 import toast from "react-hot-toast";
 
 export const MemberDashboardPage = () => {
   const { currentUser } = useAuth();
   const {
+    loading,
     teamMembers,
     projects,
     updateMemberProfile,
@@ -51,27 +53,53 @@ export const MemberDashboardPage = () => {
 
   const [activeTab, setActiveTab] = useState("profile");
 
-  // Get current active member profile data
+  // Get current active member profile data safely (no falling back to teamMembers[0])
   const currentMember = teamMembers.find(
-    (m) => m.uid === currentUser?.uid || m.id === currentUser?.uid || m.email === currentUser?.email
-  ) || teamMembers[0];
+    (m) =>
+      m.uid === currentUser?.uid ||
+      m.id === currentUser?.uid ||
+      (m.email && currentUser?.email && m.email.toLowerCase() === currentUser.email.toLowerCase())
+  );
+
+  const targetUid = currentMember?.uid || currentMember?.id || currentUser?.uid;
 
   // Forms state
   const [profileForm, setProfileForm] = useState({
-    fullName: currentMember?.fullName || "",
+    fullName: currentMember?.fullName || currentUser?.displayName || "",
     title: currentMember?.title || "",
     avatar: currentMember?.avatar || "",
     bio: currentMember?.bio || "",
     aboutMe: currentMember?.aboutMe || "",
     careerObjective: currentMember?.careerObjective || "",
     areasOfInterest: currentMember?.areasOfInterest?.join(", ") || "",
-    email: currentMember?.contact?.email || currentMember?.email || "",
+    email: currentMember?.contact?.email || currentMember?.email || currentUser?.email || "",
     phone: currentMember?.contact?.phone || "",
     location: currentMember?.contact?.location || "",
     github: currentMember?.contact?.github || "",
     linkedin: currentMember?.contact?.linkedin || "",
     website: currentMember?.contact?.website || "",
   });
+
+  // Sync profile form once member data loads from Firestore
+  useEffect(() => {
+    if (currentMember) {
+      setProfileForm({
+        fullName: currentMember.fullName || "",
+        title: currentMember.title || "",
+        avatar: currentMember.avatar || "",
+        bio: currentMember.bio || "",
+        aboutMe: currentMember.aboutMe || "",
+        careerObjective: currentMember.careerObjective || "",
+        areasOfInterest: currentMember.areasOfInterest?.join(", ") || "",
+        email: currentMember.contact?.email || currentMember.email || currentUser?.email || "",
+        phone: currentMember.contact?.phone || "",
+        location: currentMember.contact?.location || "",
+        github: currentMember.contact?.github || "",
+        linkedin: currentMember.contact?.linkedin || "",
+        website: currentMember.contact?.website || "",
+      });
+    }
+  }, [currentMember, currentUser?.email]);
 
   // Modal states
   const [eduModalOpen, setEduModalOpen] = useState(false);
@@ -129,43 +157,60 @@ export const MemberDashboardPage = () => {
     return <Navigate to="/login" replace />;
   }
 
+  if (loading && !currentMember) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <LoadingSpinner message="Loading your profile data..." />
+      </div>
+    );
+  }
+
   const completion = calculateProfileCompletion(currentMember);
   const myProjects = projects.filter((p) => p.ownerUid === (currentMember?.uid || currentMember?.id));
 
   // Handlers
-  const handleSaveProfile = (e) => {
+  const handleSaveProfile = async (e) => {
     e.preventDefault();
+    if (!targetUid) {
+      toast.error("User profile is still initializing. Please wait a moment.");
+      return;
+    }
     const interests = profileForm.areasOfInterest
       ? profileForm.areasOfInterest.split(",").map((s) => s.trim()).filter(Boolean)
       : [];
 
-    updateMemberProfile(currentMember.uid || currentMember.id, {
-      fullName: profileForm.fullName,
-      title: profileForm.title,
-      avatar: profileForm.avatar,
-      bio: profileForm.bio,
-      aboutMe: profileForm.aboutMe,
-      careerObjective: profileForm.careerObjective,
-      areasOfInterest: interests,
-      contact: {
-        email: profileForm.email,
-        phone: profileForm.phone,
-        location: profileForm.location,
-        github: profileForm.github,
-        linkedin: profileForm.linkedin,
-        website: profileForm.website,
-      },
-    });
-    toast.success("Profile updated successfully!");
+    try {
+      await updateMemberProfile(targetUid, {
+        fullName: profileForm.fullName,
+        title: profileForm.title,
+        avatar: profileForm.avatar,
+        bio: profileForm.bio,
+        aboutMe: profileForm.aboutMe,
+        careerObjective: profileForm.careerObjective,
+        areasOfInterest: interests,
+        contact: {
+          email: profileForm.email,
+          phone: profileForm.phone,
+          location: profileForm.location,
+          github: profileForm.github,
+          linkedin: profileForm.linkedin,
+          website: profileForm.website,
+        },
+      });
+      toast.success("Profile updated successfully!");
+    } catch (err) {
+      toast.error("Failed to update profile.");
+    }
   };
 
-  const handleSaveEdu = (e) => {
+  const handleSaveEdu = async (e) => {
     e.preventDefault();
+    if (!targetUid) return;
     if (editingEdu) {
-      updateEducation(currentMember.uid || currentMember.id, editingEdu.id, eduForm);
+      await updateEducation(targetUid, editingEdu.id, eduForm);
       toast.success("Education updated");
     } else {
-      addEducation(currentMember.uid || currentMember.id, eduForm);
+      await addEducation(targetUid, eduForm);
       toast.success("Education record added");
     }
     setEduModalOpen(false);
@@ -173,13 +218,14 @@ export const MemberDashboardPage = () => {
     setEduForm({ degree: "", institution: "", department: "", startYear: "", endYear: "", grade: "", description: "" });
   };
 
-  const handleSaveCert = (e) => {
+  const handleSaveCert = async (e) => {
     e.preventDefault();
+    if (!targetUid) return;
     if (editingCert) {
-      updateCertificate(currentMember.uid || currentMember.id, editingCert.id, certForm);
+      await updateCertificate(targetUid, editingCert.id, certForm);
       toast.success("Certificate updated");
     } else {
-      addCertificate(currentMember.uid || currentMember.id, certForm);
+      await addCertificate(targetUid, certForm);
       toast.success("Certificate added");
     }
     setCertModalOpen(false);
@@ -187,16 +233,17 @@ export const MemberDashboardPage = () => {
     setCertForm({ name: "", organization: "", issueDate: "", credentialId: "", credentialUrl: "", description: "" });
   };
 
-  const handleSaveSkill = (e) => {
+  const handleSaveSkill = async (e) => {
     e.preventDefault();
+    if (!targetUid) return;
     if (editingSkill) {
-      updateSkill(currentMember.uid || currentMember.id, editingSkill.id, {
+      await updateSkill(targetUid, editingSkill.id, {
         ...skillForm,
         level: Number(skillForm.level),
       });
       toast.success("Skill updated");
     } else {
-      addSkill(currentMember.uid || currentMember.id, {
+      await addSkill(targetUid, {
         ...skillForm,
         level: Number(skillForm.level),
       });
@@ -209,6 +256,7 @@ export const MemberDashboardPage = () => {
 
   const handleSaveProject = async (e) => {
     e.preventDefault();
+    if (!targetUid) return;
     const techArray = projForm.technologies
       ? projForm.technologies.split(",").map((t) => t.trim()).filter(Boolean)
       : [];
@@ -236,7 +284,7 @@ export const MemberDashboardPage = () => {
       await updateProject(editingProj.id, payload);
       toast.success("Project updated!");
     } else {
-      await submitProject(payload, currentMember.uid || currentMember.id);
+      await submitProject(payload, targetUid);
       toast.success("Project added successfully! It is now live in Central Team Projects.");
     }
     setProjModalOpen(false);

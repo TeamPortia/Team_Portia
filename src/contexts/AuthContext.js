@@ -12,7 +12,7 @@ import {
   doc,
   getDoc,
   setDoc,
-  deleteDoc,
+  updateDoc,
   collection,
   query,
   where,
@@ -26,18 +26,18 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Set user online/offline status in Firestore
+  // Set user online/offline status in Firestore without creating empty phantom docs
   const setOnlineStatus = async (uid, isOnline) => {
     if (!uid) return;
     try {
-      await setDoc(
-        doc(db, "users", uid),
-        {
+      const userRef = doc(db, "users", uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        await updateDoc(userRef, {
           isOnline: isOnline,
           lastSeen: new Date().toISOString(),
-        },
-        { merge: true }
-      );
+        });
+      }
     } catch (e) {
       console.warn("Failed to set online status:", e);
     }
@@ -66,17 +66,12 @@ export const AuthProvider = ({ children }) => {
                 const oldDoc = querySnap.docs[0];
                 data = oldDoc.data();
 
+                // Safely associate fbUser.uid without deleting the existing document
                 if (oldDoc.id !== fbUser.uid) {
-                  try {
-                    await deleteDoc(doc(db, "users", oldDoc.id));
-                  } catch {}
                   await setDoc(
-                    doc(db, "users", fbUser.uid),
+                    doc(db, "users", oldDoc.id),
                     {
-                      ...data,
-                      id: fbUser.uid,
                       uid: fbUser.uid,
-                      email: cleanEmail,
                       updatedAt: new Date().toISOString(),
                     },
                     { merge: true }

@@ -112,7 +112,7 @@ export const DataProvider = ({ children }) => {
 
   const activeMembers = useMemo(() => {
     return teamMembers
-      .filter((m) => m.status !== "disabled" && m.role !== "ADMIN" && !m.isAdmin)
+      .filter((m) => m.status !== "disabled" && m.role !== "ADMIN" && !m.isAdmin && (m.fullName || m.email))
       .map((m) => ({
         ...m,
         isOnline: checkIsOnline(m),
@@ -150,6 +150,10 @@ export const DataProvider = ({ children }) => {
 
   // MEMBER ACTIONS (Direct to Firestore)
   const updateMemberProfile = async (uid, updates) => {
+    if (!uid) {
+      console.warn("updateMemberProfile blocked: missing uid to prevent phantom empty document creation.");
+      return;
+    }
     try {
       await setDoc(doc(db, "users", uid), updates, { merge: true });
     } catch (err) {
