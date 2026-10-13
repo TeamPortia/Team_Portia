@@ -94,8 +94,8 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/achievements" className="hover:text-indigo-400 transition flex items-center gap-1">
-                  Team Achievements
+                <Link to="/services" className="hover:text-indigo-400 transition flex items-center gap-1">
+                  Our Services
                 </Link>
               </li>
               <li>

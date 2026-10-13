@@ -16,7 +16,7 @@ import { TeamPage } from "./pages/TeamPage";
 import { MemberProfilePage } from "./pages/MemberProfilePage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { ProjectDetailPage } from "./pages/ProjectDetailPage";
-import { AchievementsPage } from "./pages/AchievementsPage";
+import { ServicesPage } from "./pages/ServicesPage";
 import { ContactPage } from "./pages/ContactPage";
 import { LoginPage } from "./pages/LoginPage";
 import { AdminLoginPage } from "./pages/AdminLoginPage";
@@ -64,7 +64,8 @@ function App() {
                   <Route path="/team/:userId" element={<MemberProfilePage />} />
                   <Route path="/projects" element={<ProjectsPage />} />
                   <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-                  <Route path="/achievements" element={<AchievementsPage />} />
+                  <Route path="/services" element={<ServicesPage />} />
+                  <Route path="/achievements" element={<Navigate to="/services" replace />} />
                   <Route path="/contact" element={<ContactPage />} />
 
                   {/* Authentication */}

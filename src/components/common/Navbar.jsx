@@ -14,7 +14,7 @@ import {
   ChevronDown,
   LayoutDashboard,
   Layers,
-  Award,
+  Briefcase,
   Users,
   Code2,
   FolderGit2,
@@ -46,7 +46,7 @@ export const Navbar = () => {
     { name: "Home", path: "/", icon: Layers },
     { name: "Team", path: "/team", icon: Users },
     { name: "Projects", path: "/projects", icon: FolderGit2 },
-    { name: "Achievements", path: "/achievements", icon: Award },
+    { name: "Services", path: "/services", icon: Briefcase },
     { name: "Contact", path: "/contact", icon: Mail },
   ];
 

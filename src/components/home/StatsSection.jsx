@@ -1,7 +1,7 @@
 // src/components/home/StatsSection.jsx
 import React from "react";
 import { useData } from "../../contexts/DataContext";
-import { Users, FolderGit2, Cpu, Trophy, CheckCircle2 } from "lucide-react";
+import { Users, FolderGit2, Cpu, Briefcase, CheckCircle2 } from "lucide-react";
 
 export const StatsSection = () => {
   const { stats } = useData();
@@ -44,10 +44,10 @@ export const StatsSection = () => {
       bgColor: "bg-amber-50 dark:bg-amber-950/50",
     },
     {
-      label: "Awards & Hackathons",
-      value: `${stats.totalAchievements}+`,
-      subtext: "National & Global Recognitions",
-      icon: Trophy,
+      label: "Core Services",
+      value: "6+",
+      subtext: "App, Web, IoT & Cloud Solutions",
+      icon: Briefcase,
       color: "from-rose-500 to-red-600",
       textColor: "text-rose-600 dark:text-rose-400",
       bgColor: "bg-rose-50 dark:bg-rose-950/50",

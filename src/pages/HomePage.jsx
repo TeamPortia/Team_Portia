@@ -6,7 +6,7 @@ import { AboutSection } from "../components/home/AboutSection";
 import { TeamGrid } from "../components/home/TeamGrid";
 import { ProjectsShowcase } from "../components/home/ProjectsShowcase";
 import { SkillsCloud } from "../components/home/SkillsCloud";
-import { AchievementsSection } from "../components/home/AchievementsSection";
+import { ServicesSection } from "../components/home/ServicesSection";
 import { ContactSection } from "../components/home/ContactSection";
 
 export const HomePage = () => {
@@ -18,7 +18,7 @@ export const HomePage = () => {
       <TeamGrid limit={4} showViewAll={true} />
       <ProjectsShowcase limit={6} showViewAll={true} />
       <SkillsCloud />
-      <AchievementsSection />
+      <ServicesSection />
       <ContactSection />
     </div>
   );
