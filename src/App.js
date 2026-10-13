@@ -7,6 +7,7 @@ import { DataProvider } from "./contexts/DataContext";
 import { Navbar } from "./components/common/Navbar";
 import { Footer } from "./components/common/Footer";
 import { CustomCursor } from "./components/common/CustomCursor";
+import { LuxuryAuraBackground } from "./components/common/LuxuryAuraBackground";
 import { Toaster } from "react-hot-toast";
 
 // Pages
@@ -51,10 +52,11 @@ function App() {
       <AuthProvider>
         <DataProvider>
           <BrowserRouter>
+            <LuxuryAuraBackground />
             <CustomCursor />
-            <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors selection:bg-indigo-500 selection:text-white">
+            <div className="min-h-screen flex flex-col relative bg-slate-50/60 dark:bg-transparent text-gray-900 dark:text-gray-100 transition-colors selection:bg-indigo-500 selection:text-white">
               <Navbar />
-              <main className="flex-1">
+              <main className="flex-1 relative z-10">
                 <Routes>
                   {/* Public Core Routes */}
                   <Route path="/" element={<HomePage />} />

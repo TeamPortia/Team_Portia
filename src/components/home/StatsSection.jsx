@@ -63,7 +63,7 @@ export const StatsSection = () => {
             return (
               <div
                 key={idx}
-                className="relative overflow-hidden p-5 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/80 shadow-sm hover:shadow-md hover:-translate-y-1 transition duration-300 group"
+                className="relative overflow-hidden p-5 rounded-2xl luxury-glass border border-white/40 dark:border-white/10 shadow-lg luxury-card group"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className={`p-2.5 rounded-xl ${item.bgColor}`}>

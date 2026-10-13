@@ -7,7 +7,7 @@ import { Badge } from "../common/Badge";
 
 export const MemberCard = ({ member }) => {
   return (
-    <div className="group relative rounded-3xl bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/80 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between">
+    <div className="group relative rounded-3xl luxury-glass border border-white/40 dark:border-white/10 p-6 shadow-lg luxury-card flex flex-col justify-between">
       {/* Top Header */}
       <div>
         <div className="flex items-start gap-4 mb-4">

@@ -7,7 +7,7 @@ import { Badge } from "../common/Badge";
 
 export const ProjectCard = ({ project }) => {
   return (
-    <div className="group relative rounded-3xl bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/80 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden">
+    <div className="group relative rounded-3xl luxury-glass border border-white/40 dark:border-white/10 shadow-lg luxury-card flex flex-col justify-between overflow-hidden">
       <div>
         {/* Banner Image */}
         <div className="relative h-52 sm:h-56 w-full overflow-hidden bg-gray-900">

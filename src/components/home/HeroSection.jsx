@@ -35,7 +35,7 @@ export const HeroSection = () => {
           {/* Main Headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.15]">
             Building Ideas. <br className="hidden sm:block" />
-            <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-indigo-500 via-purple-500 via-pink-500 to-cyan-400 bg-clip-text text-transparent luxury-shimmer">
               Creating Measurable Impact.
             </span>
           </h1>
@@ -50,7 +50,7 @@ export const HeroSection = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3 w-full max-w-md mx-auto sm:max-w-none">
             <Link
               to="/team"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-xl shadow-indigo-600/25 transition-all hover:scale-105 active:scale-95 text-sm"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold shadow-xl shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 text-sm luxury-card"
             >
               <Users className="w-4 h-4" />
               Explore Our Team
@@ -59,7 +59,7 @@ export const HeroSection = () => {
 
             <Link
               to="/projects"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 font-semibold border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/80 shadow-md transition-all hover:scale-105 active:scale-95 text-sm"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl luxury-glass text-gray-800 dark:text-gray-100 font-semibold border border-white/30 dark:border-white/10 hover:bg-white/90 dark:hover:bg-gray-800/90 shadow-lg transition-all hover:scale-105 active:scale-95 text-sm luxury-card"
             >
               <FolderGit2 className="w-4 h-4 text-indigo-500" />
               View Centralized Projects

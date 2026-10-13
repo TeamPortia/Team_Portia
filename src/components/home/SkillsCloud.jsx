@@ -70,7 +70,7 @@ export const SkillsCloud = () => {
           {displayedSkills.map((skill, idx) => (
             <div
               key={idx}
-              className="p-4 rounded-2xl bg-white dark:bg-gray-800/90 border border-gray-100 dark:border-gray-700/80 shadow-sm hover:shadow-lg hover:-translate-y-1 transition duration-300 flex flex-col justify-between"
+              className="p-4 rounded-2xl luxury-glass border border-white/40 dark:border-white/10 shadow-sm luxury-card flex flex-col justify-between"
             >
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-1">

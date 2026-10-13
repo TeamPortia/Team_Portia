@@ -34,7 +34,7 @@ export const AboutSection = () => {
   ];
 
   return (
-    <section className="py-20 bg-gray-50/50 dark:bg-gray-900/30">
+    <section className="py-20 bg-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
@@ -58,7 +58,7 @@ export const AboutSection = () => {
             return (
               <div
                 key={idx}
-                className="p-6 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/80 shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1.5"
+                className="p-6 rounded-3xl luxury-glass border border-white/40 dark:border-white/10 shadow-lg luxury-card group"
               >
                 <div
                   className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${p.gradient} flex items-center justify-center text-white mb-5 shadow-lg group-hover:scale-110 transition-transform`}
