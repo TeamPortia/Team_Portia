@@ -10,6 +10,12 @@
   body {
     @apply bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased selection:bg-indigo-500 selection:text-white font-sans overflow-x-hidden;
   }
+
+  @media (pointer: fine) {
+    body, a, button, [role="button"], select, label, .cursor-pointer {
+      cursor: none;
+    }
+  }
 }
 
 /* Custom scrollbars */

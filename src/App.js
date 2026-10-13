@@ -6,6 +6,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { DataProvider } from "./contexts/DataContext";
 import { Navbar } from "./components/common/Navbar";
 import { Footer } from "./components/common/Footer";
+import { CustomCursor } from "./components/common/CustomCursor";
 import { Toaster } from "react-hot-toast";
 
 // Pages
@@ -50,6 +51,7 @@ function App() {
       <AuthProvider>
         <DataProvider>
           <BrowserRouter>
+            <CustomCursor />
             <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors selection:bg-indigo-500 selection:text-white">
               <Navbar />
               <main className="flex-1">
