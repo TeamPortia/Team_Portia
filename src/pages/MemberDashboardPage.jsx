@@ -4,8 +4,6 @@ import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useData } from "../contexts/DataContext";
 import { calculateProfileCompletion, convertFileToBase64 } from "../utils/helpers";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { storage } from "../services/firebase";
 import {
   User,
   GraduationCap,
@@ -49,6 +47,8 @@ export const MemberDashboardPage = () => {
     addSkill,
     updateSkill,
     deleteSkill,
+    uploadResumeFile,
+    downloadResumeFile,
     updateResume,
     deleteResume,
     submitProject,
@@ -172,6 +172,11 @@ export const MemberDashboardPage = () => {
       return;
     }
 
+    if (file.size > 12 * 1024 * 1024) {
+      toast.error("File is too large. Please upload a PDF under 12 MB.");
+      return;
+    }
+
     const uid = targetUid;
     if (!uid) {
       toast.error("User session not found. Please log in again.");
@@ -179,44 +184,12 @@ export const MemberDashboardPage = () => {
     }
 
     setIsUploadingResume(true);
-    const toastId = toast.loading("Uploading resume PDF...");
+    const toastId = toast.loading("Saving resume PDF...");
 
     try {
-      let finalUrl = "";
-
-      // 1. Attempt upload to Firebase Storage
-      try {
-        const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-        const storageRef = ref(storage, `users/${uid}/resumes/${Date.now()}_${cleanName}`);
-        const snapshot = await uploadBytes(storageRef, file, {
-          contentType: "application/pdf",
-        });
-        finalUrl = await getDownloadURL(snapshot.ref);
-      } catch (storageErr) {
-        console.warn("Firebase Storage unavailable or error, falling back to Base64:", storageErr);
-      }
-
-      // 2. Base64 fallback if storage failed or is not configured
-      if (!finalUrl) {
-        if (file.size > 850 * 1024) {
-          toast.dismiss(toastId);
-          setIsUploadingResume(false);
-          toast.error(
-            `File size is ${(file.size / (1024 * 1024)).toFixed(1)} MB. Please upload a PDF under 850 KB or paste your Google Drive link below.`,
-            { duration: 6500 }
-          );
-          return;
-        }
-        finalUrl = await convertFileToBase64(file);
-      }
-
-      if (finalUrl) {
-        await updateResume(uid, finalUrl, file.name);
-        toast.dismiss(toastId);
-        toast.success("Resume updated successfully!");
-      } else {
-        throw new Error("Could not process resume file.");
-      }
+      await uploadResumeFile(uid, file);
+      toast.dismiss(toastId);
+      toast.success("Resume uploaded successfully!");
     } catch (err) {
       console.error("Resume upload error:", err);
       toast.dismiss(toastId);
@@ -962,15 +935,14 @@ export const MemberDashboardPage = () => {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      <a
-                        href={currentMember.resumeUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition"
+                      <button
+                        type="button"
+                        onClick={() => downloadResumeFile(currentMember)}
+                        className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition cursor-pointer"
                       >
                         <Download className="w-3.5 h-3.5" />
                         Download
-                      </a>
+                      </button>
                       <button
                         onClick={async () => {
                           if (targetUid) {

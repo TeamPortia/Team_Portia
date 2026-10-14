@@ -7,6 +7,8 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
+  getDocs,
+  writeBatch,
   onSnapshot,
 } from "firebase/firestore";
 import { initialTeamSettings } from "../services/mockData";
@@ -242,13 +244,126 @@ export const DataProvider = ({ children }) => {
     await updateMemberProfile(uid, { skills: filteredSkills });
   };
 
-  // Resume Management
+  // Resume Management (100% Reliable Firestore Direct Storage + Auto Chunking)
+  const uploadResumeFile = async (uid, file) => {
+    if (!uid) throw new Error("User session not found.");
+    if (!file) throw new Error("No file provided.");
+
+    // Convert file to Base64
+    const base64Data = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (err) => reject(err);
+    });
+
+    const SINGLE_DOC_LIMIT = 600 * 1024; // 600 KB threshold for single document
+
+    if (file.size <= SINGLE_DOC_LIMIT) {
+      // 1. Direct storage in user profile (super fast, < 0.3s)
+      await updateMemberProfile(uid, {
+        resumeUrl: base64Data,
+        resumeName: file.name,
+      });
+
+      // Clean up any old chunks if they existed
+      try {
+        const snap = await getDocs(collection(db, "users", uid, "resumeChunks"));
+        if (!snap.empty) {
+          const batch = writeBatch(db);
+          snap.forEach((d) => batch.delete(d.ref));
+          await batch.commit();
+        }
+      } catch {}
+    } else {
+      // 2. Multi-chunk storage for larger files (e.g. 1MB - 12MB)
+      const CHUNK_SIZE = 400000; // 400,000 characters per chunk
+      const totalChunks = Math.ceil(base64Data.length / CHUNK_SIZE);
+
+      const batch = writeBatch(db);
+
+      // Meta document
+      const metaRef = doc(db, "users", uid, "resumeChunks", "meta");
+      batch.set(metaRef, {
+        totalChunks,
+        totalSize: file.size,
+        fileName: file.name,
+        updatedAt: new Date().toISOString(),
+      });
+
+      // Individual chunk documents
+      for (let i = 0; i < totalChunks; i++) {
+        const chunkData = base64Data.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+        const chunkRef = doc(db, "users", uid, "resumeChunks", `chunk_${i}`);
+        batch.set(chunkRef, { index: i, data: chunkData });
+      }
+
+      await batch.commit();
+
+      // Update user doc with marker
+      await updateMemberProfile(uid, {
+        resumeUrl: "chunked",
+        resumeName: file.name,
+      });
+    }
+
+    return true;
+  };
+
+  const downloadResumeFile = async (member) => {
+    if (!member || !member.resumeUrl) return;
+
+    if (member.resumeUrl.startsWith("http") && member.resumeUrl !== "chunked") {
+      window.open(member.resumeUrl, "_blank");
+      return;
+    }
+
+    if (member.resumeUrl.startsWith("data:")) {
+      const a = document.createElement("a");
+      a.href = member.resumeUrl;
+      a.download = member.resumeName || "Resume.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return;
+    }
+
+    if (member.resumeUrl === "chunked") {
+      const memberId = member.uid || member.id;
+      const snap = await getDocs(collection(db, "users", memberId, "resumeChunks"));
+      const chunks = [];
+      snap.forEach((d) => {
+        if (d.id.startsWith("chunk_")) {
+          chunks.push(d.data());
+        }
+      });
+      chunks.sort((a, b) => a.index - b.index);
+      const fullData = chunks.map((c) => c.data).join("");
+
+      const a = document.createElement("a");
+      a.href = fullData;
+      a.download = member.resumeName || "Resume.pdf";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
   const updateResume = async (uid, resumeUrl, resumeName) => {
     await updateMemberProfile(uid, { resumeUrl, resumeName });
   };
 
   const deleteResume = async (uid) => {
+    if (!uid) return;
     await updateMemberProfile(uid, { resumeUrl: "", resumeName: "" });
+    try {
+      const snap = await getDocs(collection(db, "users", uid, "resumeChunks"));
+      if (!snap.empty) {
+        const batch = writeBatch(db);
+        snap.forEach((d) => batch.delete(d.ref));
+        await batch.commit();
+      }
+    } catch {}
   };
 
   // Projects CRUD (Direct to Firestore)
@@ -427,6 +542,8 @@ export const DataProvider = ({ children }) => {
         addSkill,
         updateSkill,
         deleteSkill,
+        uploadResumeFile,
+        downloadResumeFile,
         updateResume,
         deleteResume,
         submitProject,

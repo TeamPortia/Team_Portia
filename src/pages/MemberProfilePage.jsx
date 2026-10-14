@@ -22,7 +22,7 @@ import { Button } from "../components/common/Button";
 
 export const MemberProfilePage = () => {
   const { userId } = useParams();
-  const { getMemberById } = useData();
+  const { getMemberById, downloadResumeFile } = useData();
   const member = getMemberById(userId);
 
   if (!member) {
@@ -105,16 +105,14 @@ export const MemberProfilePage = () => {
               {/* Action Buttons: Resume & Contact */}
               <div className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-3">
                 {member.resumeUrl ? (
-                  <a
-                    href={member.resumeUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    download={member.resumeName || "Resume.pdf"}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-md shadow-indigo-600/25 transition w-full sm:w-auto"
+                  <button
+                    type="button"
+                    onClick={() => downloadResumeFile(member)}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold shadow-md shadow-indigo-600/25 transition w-full sm:w-auto cursor-pointer"
                   >
                     <Download className="w-4 h-4" />
                     Download Resume
-                  </a>
+                  </button>
                 ) : null}
 
                 {member.contact?.email && (
