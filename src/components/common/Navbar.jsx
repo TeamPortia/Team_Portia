@@ -60,24 +60,13 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo & Brand */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-md flex items-center justify-center p-1.5 overflow-hidden group-hover:scale-105 transition-transform">
+          <Link to="/" className="flex items-center group py-1">
+            <div className="px-3 py-1.5 rounded-2xl bg-white/95 dark:bg-white shadow-sm border border-gray-200/60 dark:border-white/20 flex items-center group-hover:scale-105 group-hover:shadow-md transition-all">
               <img
                 src="/inovexa-logo.png"
-                alt="Inovexa Technologies"
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                }}
+                alt={teamSettings?.teamName || "Inovexa Technologies"}
+                className="h-8 sm:h-10 md:h-11 w-auto max-w-[190px] sm:max-w-[240px] object-contain"
               />
-            </div>
-            <div>
-              <span className="text-lg font-bold bg-gradient-to-r from-gray-900 via-indigo-900 to-gray-700 dark:from-white dark:via-indigo-200 dark:to-gray-300 bg-clip-text text-transparent">
-                {teamSettings?.teamName || "Inovexa Technologies"}
-              </span>
-              <span className="hidden sm:block text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold tracking-wide">
-                {teamSettings?.tagline || "Your Vision, Our Technology."}
-              </span>
             </div>
           </Link>
 

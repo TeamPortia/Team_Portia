@@ -14,25 +14,12 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-xl bg-white p-1.5 flex items-center justify-center shadow-lg shadow-indigo-500/20 overflow-hidden">
-                <img
-                  src="/inovexa-logo.png"
-                  alt="Inovexa Technologies"
-                  className="w-full h-full object-contain"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                  }}
-                />
-              </div>
-              <div>
-                <span className="text-xl font-bold text-white tracking-tight">
-                  {teamSettings?.teamName || "Inovexa Technologies"}
-                </span>
-                <p className="text-[11px] text-indigo-400 font-medium">
-                  {teamSettings?.tagline || "Your Vision, Our Technology."}
-                </p>
-              </div>
+            <div className="inline-flex items-center p-2 px-3.5 rounded-2xl bg-white shadow-xl">
+              <img
+                src="/inovexa-logo.png"
+                alt="Inovexa Technologies"
+                className="h-9 sm:h-11 w-auto max-w-[220px] sm:max-w-[260px] object-contain"
+              />
             </div>
             <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
               {teamSettings?.description ||
