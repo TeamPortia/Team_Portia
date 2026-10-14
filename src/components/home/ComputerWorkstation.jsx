@@ -102,7 +102,7 @@ export const ComputerWorkstation = () => {
             <span className="w-3 h-3 rounded-full bg-amber-500 inline-block shadow-sm"></span>
             <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block shadow-sm"></span>
             <span className="text-[11px] text-gray-400 font-mono ml-2 hidden sm:inline-block">
-              developer_workspace.kt — Team Portfolio Workstation
+              developer_workspace.kt — Inovexa Technologies Workstation
             </span>
           </div>
 

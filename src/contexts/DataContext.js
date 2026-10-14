@@ -67,7 +67,21 @@ export const DataProvider = ({ children }) => {
       collection(db, "settings"),
       (snapshot) => {
         if (!snapshot.empty) {
-          setTeamSettings((prev) => ({ ...prev, ...snapshot.docs[0].data() }));
+          const docData = snapshot.docs[0].data();
+          setTeamSettings((prev) => ({
+            ...initialTeamSettings,
+            ...prev,
+            ...docData,
+            teamName:
+              docData.teamName && docData.teamName !== "Team Portfolio Hub" && docData.teamName !== "Team Portfolio"
+                ? docData.teamName
+                : "Inovexa Technologies",
+            contactEmail:
+              docData.contactEmail && docData.contactEmail !== "contact@teamportfolio.dev"
+                ? docData.contactEmail
+                : "inovexatechnologies2026@gmail.com",
+            tagline: docData.tagline || "Your Vision, Our Technology.",
+          }));
         }
       },
       (error) => {

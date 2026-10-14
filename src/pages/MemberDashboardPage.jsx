@@ -4,6 +4,8 @@ import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useData } from "../contexts/DataContext";
 import { calculateProfileCompletion, convertFileToBase64 } from "../utils/helpers";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../services/firebase";
 import {
   User,
   GraduationCap,
@@ -20,6 +22,9 @@ import {
   Eye,
   Save,
   Crop,
+  Link2,
+  CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import { Badge } from "../components/common/Badge";
 import { Button } from "../components/common/Button";
@@ -152,6 +157,103 @@ export const MemberDashboardPage = () => {
 
   const [cropperOpen, setCropperOpen] = useState(false);
   const [selectedRawImage, setSelectedRawImage] = useState("");
+
+  // Resume states
+  const [isUploadingResume, setIsUploadingResume] = useState(false);
+  const [resumeUrlInput, setResumeUrlInput] = useState("");
+  const [isSavingResumeUrl, setIsSavingResumeUrl] = useState(false);
+
+  const handleResumeFileUpload = async (file) => {
+    if (!file) return;
+
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      toast.error("Please upload a PDF format resume document.");
+      return;
+    }
+
+    const uid = targetUid;
+    if (!uid) {
+      toast.error("User session not found. Please log in again.");
+      return;
+    }
+
+    setIsUploadingResume(true);
+    const toastId = toast.loading("Uploading resume PDF...");
+
+    try {
+      let finalUrl = "";
+
+      // 1. Attempt upload to Firebase Storage
+      try {
+        const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+        const storageRef = ref(storage, `users/${uid}/resumes/${Date.now()}_${cleanName}`);
+        const snapshot = await uploadBytes(storageRef, file, {
+          contentType: "application/pdf",
+        });
+        finalUrl = await getDownloadURL(snapshot.ref);
+      } catch (storageErr) {
+        console.warn("Firebase Storage unavailable or error, falling back to Base64:", storageErr);
+      }
+
+      // 2. Base64 fallback if storage failed or is not configured
+      if (!finalUrl) {
+        if (file.size > 850 * 1024) {
+          toast.dismiss(toastId);
+          setIsUploadingResume(false);
+          toast.error(
+            `File size is ${(file.size / (1024 * 1024)).toFixed(1)} MB. Please upload a PDF under 850 KB or paste your Google Drive link below.`,
+            { duration: 6500 }
+          );
+          return;
+        }
+        finalUrl = await convertFileToBase64(file);
+      }
+
+      if (finalUrl) {
+        await updateResume(uid, finalUrl, file.name);
+        toast.dismiss(toastId);
+        toast.success("Resume updated successfully!");
+      } else {
+        throw new Error("Could not process resume file.");
+      }
+    } catch (err) {
+      console.error("Resume upload error:", err);
+      toast.dismiss(toastId);
+      toast.error(err.message || "Failed to upload resume file.");
+    } finally {
+      setIsUploadingResume(false);
+    }
+  };
+
+  const handleSaveResumeLink = async (e) => {
+    e.preventDefault();
+    if (!resumeUrlInput.trim()) {
+      toast.error("Please enter a valid link.");
+      return;
+    }
+    const uid = targetUid;
+    if (!uid) {
+      toast.error("User session not found.");
+      return;
+    }
+
+    setIsSavingResumeUrl(true);
+    try {
+      let link = resumeUrlInput.trim();
+      if (!link.startsWith("http://") && !link.startsWith("https://")) {
+        link = `https://${link}`;
+      }
+      await updateResume(uid, link, "Resume_Document.pdf");
+      toast.success("Resume link saved successfully!");
+      setResumeUrlInput("");
+    } catch (err) {
+      console.error("Failed to save resume link:", err);
+      toast.error("Failed to save resume link.");
+    } finally {
+      setIsSavingResumeUrl(false);
+    }
+  };
 
   if (!currentUser) {
     return <Navigate to="/login" replace />;
@@ -836,70 +938,155 @@ export const MemberDashboardPage = () => {
             <div className="space-y-6">
               <div className="pb-4 border-b border-gray-100 dark:border-gray-700">
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">Curriculum Vitae / Resume</h3>
-                <p className="text-xs text-gray-500">Upload your PDF resume so visitors and recruiters can download it from your public portfolio.</p>
+                <p className="text-xs text-gray-500">
+                  Upload your PDF resume or provide a cloud link so visitors and recruiters can download it from your public portfolio.
+                </p>
               </div>
 
               {currentMember?.resumeUrl ? (
-                <div className="p-6 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 rounded-xl bg-indigo-600 text-white">
-                      <FileText className="w-6 h-6" />
+                <div className="p-6 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
+                        <FileText className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-xs sm:max-w-md">
+                          {currentMember.resumeName || "Resume_Document.pdf"}
+                        </h4>
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 mt-0.5">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Active & Live on Public Portfolio</span>
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-                        {currentMember.resumeName || "Resume_Document.pdf"}
-                      </h4>
-                      <p className="text-xs text-emerald-600 font-semibold">Active & Live on Public Portfolio</p>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <a
+                        href={currentMember.resumeUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Download
+                      </a>
+                      <button
+                        onClick={async () => {
+                          if (targetUid) {
+                            await deleteResume(targetUid);
+                            toast.success("Resume deleted");
+                          }
+                        }}
+                        className="px-3.5 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 hover:bg-rose-100 text-xs font-semibold flex items-center gap-1.5 transition"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Remove
+                      </button>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={currentMember.resumeUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 flex items-center gap-1.5"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      Download
-                    </a>
-                    <button
-                      onClick={() => {
-                        deleteResume(currentMember.uid || currentMember.id);
-                        toast.success("Resume deleted");
-                      }}
-                      className="px-3.5 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-semibold hover:bg-rose-100 flex items-center gap-1.5"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      Remove
-                    </button>
+                  {/* Option to replace existing file */}
+                  <div className="pt-3 border-t border-indigo-100 dark:border-indigo-900/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                    <span className="text-gray-500">Want to replace this resume with an updated version?</span>
+                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-indigo-600 dark:text-indigo-400 font-semibold cursor-pointer hover:bg-gray-50 transition">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload New PDF</span>
+                      <input
+                        type="file"
+                        accept=".pdf,application/pdf"
+                        disabled={isUploadingResume}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleResumeFileUpload(file);
+                          e.target.value = "";
+                        }}
+                        className="hidden"
+                      />
+                    </label>
                   </div>
                 </div>
               ) : (
-                <div className="p-8 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-3xl text-center space-y-4">
-                  <Upload className="w-10 h-10 text-gray-400 mx-auto" />
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white">Upload Your Resume (PDF)</h4>
-                  <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                    Upload your PDF resume from your device. It will be converted to Base64 and stored in Firestore.
-                  </p>
-                  <div className="pt-2 max-w-md mx-auto">
-                    <input
-                      type="file"
-                      accept=".pdf,application/pdf"
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          try {
-                            const base64 = await convertFileToBase64(file);
-                            await updateResume(currentMember.uid || currentMember.id, base64, file.name);
-                            toast.success("Resume PDF converted to Base64 & stored in Firestore!");
-                          } catch (err) {
-                            toast.error("Failed to upload resume file.");
-                          }
-                        }
-                      }}
-                      className="text-xs file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer"
-                    />
+                <div className="space-y-6">
+                  {/* File Upload Zone */}
+                  <div className="p-8 border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-400 rounded-3xl text-center space-y-4 bg-gray-50/50 dark:bg-gray-900/30 transition">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto shadow-sm">
+                      {isUploadingResume ? (
+                        <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+                      ) : (
+                        <Upload className="w-6 h-6" />
+                      )}
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-bold text-gray-900 dark:text-white">
+                        {isUploadingResume ? "Uploading Resume Document..." : "Upload Your Resume (PDF)"}
+                      </h4>
+                      <p className="text-xs text-gray-500 max-w-sm mx-auto mt-1 leading-relaxed">
+                        Choose your PDF resume from your device. Optimized for both Firebase Cloud Storage and compressed direct sync.
+                      </p>
+                    </div>
+
+                    <div className="pt-2 max-w-md mx-auto">
+                      <label
+                        className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition ${
+                          isUploadingResume
+                            ? "bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed"
+                            : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/30 hover:scale-105"
+                        }`}
+                      >
+                        {isUploadingResume ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Processing Upload...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-4 h-4" />
+                            <span>Select PDF Resume</span>
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept=".pdf,application/pdf"
+                          disabled={isUploadingResume}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleResumeFileUpload(file);
+                            e.target.value = "";
+                          }}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Alternative URL Link input */}
+                  <div className="p-6 rounded-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 space-y-3">
+                    <div className="flex items-center gap-2 text-xs font-bold text-gray-700 dark:text-gray-300">
+                      <Link2 className="w-4 h-4 text-indigo-500" />
+                      <span>Or Provide a Cloud / Google Drive Resume Link</span>
+                    </div>
+                    <p className="text-[11px] text-gray-500">
+                      If you host your resume on Google Drive, Dropbox, or OneDrive, paste the public share link here.
+                    </p>
+                    <form onSubmit={handleSaveResumeLink} className="flex flex-col sm:flex-row gap-2 pt-1">
+                      <input
+                        type="url"
+                        placeholder="https://drive.google.com/file/d/your-resume-link/view"
+                        value={resumeUrlInput}
+                        onChange={(e) => setResumeUrlInput(e.target.value)}
+                        className="flex-1 px-3.5 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                      <button
+                        type="submit"
+                        disabled={isSavingResumeUrl}
+                        className="px-4 py-2 rounded-xl bg-gray-900 hover:bg-black dark:bg-gray-800 dark:hover:bg-gray-700 text-white text-xs font-semibold transition shrink-0 flex items-center justify-center gap-1.5"
+                      >
+                        {isSavingResumeUrl ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                        <span>Save Link</span>
+                      </button>
+                    </form>
                   </div>
                 </div>
               )}

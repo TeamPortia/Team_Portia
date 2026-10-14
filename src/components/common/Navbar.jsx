@@ -16,7 +16,6 @@ import {
   Layers,
   Briefcase,
   Users,
-  Code2,
   FolderGit2,
   Mail,
 } from "lucide-react";
@@ -62,15 +61,22 @@ export const Navbar = () => {
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo & Brand */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform">
-              <Code2 className="w-5 h-5 text-white" />
+            <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-md flex items-center justify-center p-1.5 overflow-hidden group-hover:scale-105 transition-transform">
+              <img
+                src="/inovexa-logo.png"
+                alt="Inovexa Technologies"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
             </div>
             <div>
               <span className="text-lg font-bold bg-gradient-to-r from-gray-900 via-indigo-900 to-gray-700 dark:from-white dark:via-indigo-200 dark:to-gray-300 bg-clip-text text-transparent">
-                {teamSettings?.teamName || "Team Portfolio"}
+                {teamSettings?.teamName || "Inovexa Technologies"}
               </span>
-              <span className="hidden sm:block text-xs text-indigo-600 dark:text-indigo-400 font-medium tracking-wide">
-                Innovation Team Hub
+              <span className="hidden sm:block text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold tracking-wide">
+                {teamSettings?.tagline || "Your Vision, Our Technology."}
               </span>
             </div>
           </Link>

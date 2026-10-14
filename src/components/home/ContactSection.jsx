@@ -72,10 +72,10 @@ export const ContactSection = () => {
                 <div>
                   <p className="text-xs text-indigo-200">Email Address</p>
                   <a
-                    href={`mailto:${teamSettings?.contactEmail || "contact@teamportfolio.dev"}`}
+                    href={`mailto:${teamSettings?.contactEmail || "inovexatechnologies2026@gmail.com"}`}
                     className="text-sm font-semibold text-white hover:text-indigo-300 transition"
                   >
-                    {teamSettings?.contactEmail || "contact@teamportfolio.dev"}
+                    {teamSettings?.contactEmail || "inovexatechnologies2026@gmail.com"}
                   </a>
                 </div>
               </div>

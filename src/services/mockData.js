@@ -6,15 +6,15 @@ export const initialProjects = [];
 export const initialAchievements = [];
 
 export const initialTeamSettings = {
-  teamName: "Team Portfolio Hub",
-  tagline: "Building Ideas. Creating Impact.",
-  description: "We are a software engineering team dedicated to building scalable systems, modern AI applications, and high-impact digital solutions.",
-  mission: "To solve technical challenges and empower businesses and communities through elegant, secure, and scalable software systems.",
-  contactEmail: "contact@teamportfolio.dev",
+  teamName: "Inovexa Technologies",
+  tagline: "Your Vision, Our Technology.",
+  description: "We are an innovative technology enterprise dedicated to building scalable mobile apps, high-performance web systems, and smart IoT solutions.",
+  mission: "To turn your vision into groundbreaking reality through innovative software, connected hardware, and scalable technology solutions.",
+  contactEmail: "inovexatechnologies2026@gmail.com",
   contactPhone: "+91 98765 43210",
   address: "Innovation Valley Tech Park, Sector 4",
   socialLinks: {
-    github: "https://github.com",
+    github: "https://github.com/TeamPortia",
     linkedin: "https://linkedin.com",
     twitter: "https://twitter.com",
     youtube: "https://youtube.com"
