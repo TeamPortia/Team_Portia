@@ -2,7 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useData } from "../../contexts/DataContext";
-import { Heart, ArrowUpRight, Mail } from "lucide-react";
+import { Heart, ArrowUpRight, Mail, ShieldCheck } from "lucide-react";
 import { FaGithub, FaLinkedin, FaTwitter, FaYoutube } from "react-icons/fa";
 
 export const Footer = () => {
@@ -14,12 +14,18 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="inline-flex items-center p-2 px-3.5 rounded-2xl bg-white shadow-xl">
-              <img
-                src="/inovexa-logo.png"
-                alt="Inovexa Technologies"
-                className="h-9 sm:h-11 w-auto max-w-[220px] sm:max-w-[260px] object-contain"
-              />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center p-2 px-3.5 rounded-2xl bg-white shadow-xl">
+                <img
+                  src="/inovexa-logo.png"
+                  alt="Inovexa Technologies"
+                  className="h-9 sm:h-11 w-auto max-w-[220px] sm:max-w-[260px] object-contain"
+                />
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                MSME Registered
+              </span>
             </div>
             <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
               {teamSettings?.description ||
@@ -163,7 +169,7 @@ export const Footer = () => {
         </div>
 
         <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-          <p>© {new Date().getFullYear()} {teamSettings?.teamName || "Inovexa Technologies"}. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {teamSettings?.teamName || "Inovexa Technologies"} · Govt. of India MSME Registered. All rights reserved.</p>
           <p className="flex items-center gap-1">
             Engineered with <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" /> using React, Tailwind & Firebase
           </p>

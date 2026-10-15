@@ -18,6 +18,7 @@ import {
   Users,
   FolderGit2,
   Mail,
+  ShieldCheck,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -60,7 +61,7 @@ export const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo & Brand */}
-          <Link to="/" className="flex items-center group py-1">
+          <Link to="/" className="flex items-center gap-2.5 group py-1">
             <div className="px-3 py-1.5 rounded-2xl bg-white/95 dark:bg-white shadow-sm border border-gray-200/60 dark:border-white/20 flex items-center group-hover:scale-105 group-hover:shadow-md transition-all">
               <img
                 src="/inovexa-logo.png"
@@ -68,6 +69,10 @@ export const Navbar = () => {
                 className="h-8 sm:h-10 md:h-11 w-auto max-w-[190px] sm:max-w-[240px] object-contain"
               />
             </div>
+            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+              <ShieldCheck className="w-3 h-3 text-emerald-500" />
+              MSME Registered
+            </span>
           </Link>
 
           {/* Desktop Navigation */}

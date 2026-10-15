@@ -10,6 +10,7 @@ import {
   Zap,
   Cpu,
   Globe2,
+  ShieldCheck,
 } from "lucide-react";
 
 import { ComputerWorkstation } from "./ComputerWorkstation";
@@ -25,11 +26,17 @@ export const HeroSection = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto space-y-6">
-          {/* Top Pill */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300 text-xs font-semibold shadow-sm animate-bounce-subtle">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Next-Gen Engineering Collective</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          {/* Top Badges */}
+          <div className="inline-flex flex-wrap items-center justify-center gap-2.5">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300 text-xs font-semibold shadow-sm animate-bounce-subtle">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Next-Gen Engineering Collective</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300/80 dark:border-emerald-700/80 text-emerald-700 dark:text-emerald-300 text-xs font-semibold shadow-sm">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Govt. of India MSME Registered</span>
+            </div>
           </div>
 
           {/* Main Headline */}
