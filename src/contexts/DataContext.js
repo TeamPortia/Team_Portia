@@ -79,7 +79,9 @@ export const DataProvider = ({ children }) => {
                 ? docData.teamName
                 : "Inovexa Technologies",
             contactEmail:
-              docData.contactEmail && docData.contactEmail !== "contact@teamportfolio.dev"
+              docData.contactEmail &&
+              docData.contactEmail !== "contact@teamportfolio.dev" &&
+              docData.contactEmail !== "contact@krishnainfotech.dev"
                 ? docData.contactEmail
                 : "inovexatechnologies2026@gmail.com",
             contactPhone:

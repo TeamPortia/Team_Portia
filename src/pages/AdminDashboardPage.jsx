@@ -1,5 +1,5 @@
 // src/pages/AdminDashboardPage.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useData } from "../contexts/DataContext";
@@ -86,6 +86,12 @@ export const AdminDashboardPage = () => {
 
   // Team settings form
   const [settingsForm, setSettingsForm] = useState(teamSettings || {});
+
+  useEffect(() => {
+    if (teamSettings && Object.keys(teamSettings).length > 0) {
+      setSettingsForm(teamSettings);
+    }
+  }, [teamSettings]);
 
   if (!currentUser || !isAdmin) {
     return <Navigate to="/admin/login" replace />;

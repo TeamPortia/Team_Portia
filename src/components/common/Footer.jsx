@@ -2,7 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useData } from "../../contexts/DataContext";
-import { Heart, ArrowUpRight } from "lucide-react";
+import { Heart, ArrowUpRight, Mail } from "lucide-react";
 import { FaGithub, FaLinkedin, FaTwitter, FaYoutube } from "react-icons/fa";
 
 export const Footer = () => {
@@ -25,6 +25,15 @@ export const Footer = () => {
               {teamSettings?.description ||
                 "An elite engineering team dedicated to building resilient distributed systems, modern AI applications, and high-impact web products."}
             </p>
+            <div>
+              <a
+                href={`mailto:${teamSettings?.contactEmail || "inovexatechnologies2026@gmail.com"}`}
+                className="inline-flex items-center gap-2 text-xs text-indigo-400 hover:text-indigo-300 transition font-medium"
+              >
+                <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>{teamSettings?.contactEmail || "inovexatechnologies2026@gmail.com"}</span>
+              </a>
+            </div>
             <div className="flex items-center gap-3 pt-2">
               {teamSettings?.socialLinks?.github && (
                 <a
