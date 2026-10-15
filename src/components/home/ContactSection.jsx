@@ -86,9 +86,12 @@ export const ContactSection = () => {
                 </div>
                 <div>
                   <p className="text-xs text-indigo-200">Direct Phone</p>
-                  <p className="text-sm font-semibold text-white">
-                    {teamSettings?.contactPhone || "+91 98765 43210"}
-                  </p>
+                  <a
+                    href={`tel:${teamSettings?.contactPhone || "+91 9042850490"}`}
+                    className="text-sm font-semibold text-white hover:text-indigo-300 transition"
+                  >
+                    {teamSettings?.contactPhone || "+91 9042850490"}
+                  </a>
                 </div>
               </div>
 
@@ -97,9 +100,9 @@ export const ContactSection = () => {
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-xs text-indigo-200">Innovation Center</p>
+                  <p className="text-xs text-indigo-200">Location</p>
                   <p className="text-sm font-semibold text-white leading-snug">
-                    {teamSettings?.address || "Innovation Valley Tech Park, Sector 4"}
+                    {teamSettings?.address || "Rajapalayam, Tamilnadu - 626117"}
                   </p>
                 </div>
               </div>

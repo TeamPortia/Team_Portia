@@ -82,6 +82,14 @@ export const DataProvider = ({ children }) => {
               docData.contactEmail && docData.contactEmail !== "contact@teamportfolio.dev"
                 ? docData.contactEmail
                 : "inovexatechnologies2026@gmail.com",
+            contactPhone:
+              docData.contactPhone && docData.contactPhone !== "+91 98765 43210"
+                ? docData.contactPhone
+                : "+91 9042850490",
+            address:
+              docData.address && docData.address !== "Innovation Valley Tech Park, Sector 4"
+                ? docData.address
+                : "Rajapalayam, Tamilnadu - 626117",
             tagline: docData.tagline || "Your Vision, Our Technology.",
           }));
         }
